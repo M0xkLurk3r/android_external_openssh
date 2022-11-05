@@ -2137,10 +2137,19 @@ fill_default_options(Options * options)
 	if (options->update_hostkeys == -1)
 			options->update_hostkeys = SSH_UPDATE_HOSTKEYS_NO;
 	if (options->num_user_hostfiles == 0) {
-		options->user_hostfiles[options->num_user_hostfiles++] =
-		    xstrdup(_PATH_SSH_USER_HOSTFILE);
-		options->user_hostfiles[options->num_user_hostfiles++] =
-		    xstrdup(_PATH_SSH_USER_HOSTFILE2);
+		char* home_dir = getenv("HOME");
+		if (home_dir) {
+			char* new_string = (char *) calloc(4096, 1);
+			snprintf(new_string, 4096, "%s/.ssh/known_hosts", home_dir);
+			options->user_hostfiles[options->num_user_hostfiles++] =
+			    new_string;
+			debug("droopy50: now, select '%s' as ssh known_hosts file path.", new_string);
+		} else {
+			options->user_hostfiles[options->num_user_hostfiles++] =
+			    xstrdup(_PATH_SSH_USER_HOSTFILE);
+			options->user_hostfiles[options->num_user_hostfiles++] =
+			    xstrdup(_PATH_SSH_USER_HOSTFILE2);
+		}
 	}
 	if (options->log_level == SYSLOG_LEVEL_NOT_SET)
 		options->log_level = SYSLOG_LEVEL_INFO;

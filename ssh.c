@@ -1549,8 +1549,18 @@ main(int ac, char **av)
 
 	/* Create ~/.ssh * directory if it doesn't already exist. */
 	if (config == NULL) {
-		r = snprintf(buf, sizeof buf, "%s%s%s", pw->pw_dir,
+// anthony lee changed -- read "HOME" environment variable first.
+		char* pwdir = getenv("HOME");
+		if (pwdir) {
+			debug2("droopy50: using %s as home directory (reading HOME environment variable.)", pwdir);
+		} else {
+			pwdir = pw->pw_dir;
+		}
+//		r = snprintf(buf, sizeof buf, "%s%s%s", pw->pw_dir,
+//		    strcmp(pw->pw_dir, "/") ? "/" : "", _PATH_SSH_USER_DIR);
+		r = snprintf(buf, sizeof buf, "%s%s%s", pwdir,
 		    strcmp(pw->pw_dir, "/") ? "/" : "", _PATH_SSH_USER_DIR);
+// anthony lee end
 		if (r > 0 && (size_t)r < sizeof(buf) && stat(buf, &st) == -1) {
 #ifdef WITH_SELINUX
 			ssh_selinux_setfscreatecon(buf);
